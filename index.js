@@ -3,6 +3,7 @@ import  { config } from 'dotenv';
 import ConnectedToDB from './config/connection.js';
 import authRouter from './routes/authRoute.js';
 import authmiddleware from './middleware/authMiddleware.js';
+import CourseRouter from './routes/CourseRoute.js';
 
 config();
 const app = express();
@@ -13,9 +14,11 @@ app.get("/",(req,res)=>{
     res.send("Hello from the server");
 })
 
+// user endpoints
 app.use("/api/v1/",authRouter);
 
-
+// course endpoints
+app.use("/api/v1/",CourseRouter);
 
 app.listen(port,()=>{
     ConnectedToDB();

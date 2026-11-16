@@ -1,33 +1,32 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
+
 const PurchaseSchema = new mongoose.Schema({
-    user_id : {
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "users",
-        required : true
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+        required: true,
     },
-
-    course_id : {
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "Course",
-        required : true
+    course_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+        required: true,
     },
-
-    purchase_date : {
-        type : Date,
-        default : Date.now
+    purchase_date: {
+        type: Date,
+        default: Date.now,
     },
-    
-    expiry_date : {
-        type : Date,
-        default : () =>{
-            const date = new Date();
-            date.setFullYear(date.getFullYear() + 2);
-            return date;
-        }
+    expiry_date: {
+        type: Date,
+        default: function () {
+            const expiryDate = new Date(this.purchase_date || Date.now());
+            expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+            return expiryDate;
+        },
     }
-
 });
 
-const purchase = mongoose.model("purchase",PurchaseSchema);
+PurchaseSchema.index({ user_id: 1, course_id: 1 }, { unique: true });
 
-export default purchase;
+const Purchase = mongoose.model("purchase", PurchaseSchema);
+
+export default Purchase;

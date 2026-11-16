@@ -1,33 +1,31 @@
 import mongoose from "mongoose";
 
-
 const courseSchema = new mongoose.Schema({
-    id : {
-        type : mongoose.Schema.Types.ObjectId
+    title: {
+        type: String,
+        required: true,
     },
-    title : {
-        type : String,
-        required : true,
+    description: {
+        type: String,
+        required: true,
     },
-    description : {
-        type : String,
-        required : true,
+    image_url: {
+        type: String,
     },
-    image_url : {
-        type : String,
+    price: {
+        type: Number,
+        required: true,
+        min: 0,
     },
-    price : {
-        type : Number,
-        required : true,
+    isPublished: {
+        type: Boolean,
+        default: false,
     },
-    isRequired : {
-        type :  Boolean,
-        default : false,
+    syllabus: {
+        type: [String],
+        default: [],
     },
-    syllabus : {
-        type : [String]
-    }
-} , { timestamps : true})
+}, { timestamps: true });
 
 const Course = mongoose.model("Course", courseSchema);
 

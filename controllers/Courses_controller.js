@@ -1,119 +1,123 @@
-import Course from "../Schema/Course.schema.js"
+import mongoose from "mongoose";
+import Course from "../Schema/Course.schema.js";
 
-// Get All Courses
- export const GetCourse = async(req,res)=>{
-    try {
-        const course_content = await Course.find();
-        return res.status(200).json({
-                message : "All courses",
-                course_content
-            })
-    } catch (error) {
-        return res.status(500).json({
-            message : error.message
-        })
+const invalidId = (res) => res.status(400).json({
+    message: "Invalid course ID.",
+});
+
+const handleCourseError = (res, error) => {
+    if (error.name === "ValidationError" || error.name === "CastError") {
+        return res.status(400).json({ message: error.message });
     }
-}
+    return res.status(500).json({ message: error.message });
+};
 
-// Get course by Id
-export const GetCourseById = async(req,res)=>{
+export const GetCourse = async (req, res) => {
     try {
-        const course_id = req.params.id;
-        if(!course_id){
-            return res.status(400).json({
-                message : "Wrong credentials or re-login"
-            })
-        }
-        const data = await Course.findById(course_id);
-        if(!data){
-            return res.status(400).json({
-                message: "could not get any course"
-            });
+        const courses = await Course.find({ isPublished: true });
+        return res.status(200).json({
+            message: "Published courses",
+            data: courses,
+        });
+    } catch (error) {
+        return handleCourseError(res, error);
+    }
+};
+
+export const GetCourseById = async (req, res) => {
+    const courseId = req.params.id;
+    if (!mongoose.isObjectIdOrHexString(courseId)) {
+        return invalidId(res);
+    }
+
+    try {
+        const course = await Course.findOne({ _id: courseId, isPublished: true });
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
         }
         return res.status(200).json({
-            message : "Your content",
-            data
-        })
+            message: "Course details",
+            data: course,
+        });
     } catch (error) {
-        return res.status(500).json({message : error.message});
+        return handleCourseError(res, error);
     }
-}
+};
 
-// Post a course 
-
-export const PostCourses = async(req,res)=>{
+export const PostCourses = async (req, res) => {
     try {
-        const {title, description, image_url,price,isRequired,syllabus} = req.body;
-     const newCouse =  await Course.create({
+        const {
             title,
             description,
             image_url,
             price,
-            isRequired,
-            syllabus
-        })
-        return res.status(200).json({
-            message : "Course Created",
-            newCouse
-        })
+            isPublished,
+            syllabus,
+        } = req.body || {};
+        const course = await Course.create({
+            title,
+            description,
+            image_url,
+            price,
+            isPublished,
+            syllabus,
+        });
+        return res.status(201).json({
+            message: "Course created.",
+            data: course,
+        });
     } catch (error) {
-        return res.status(500).json({
-            message : error.message
-        })
+        return handleCourseError(res, error);
     }
-}
+};
 
-// Update Course by id
+export const updateCourseById = async (req, res) => {
+    const courseId = req.params.id;
+    if (!mongoose.isObjectIdOrHexString(courseId)) {
+        return invalidId(res);
+    }
 
- export const updateCourseById = async(req,res)=>{
-    const { title, description, image_url, price, syllabus } = req.body;
+    const allowedFields = ["title", "description", "image_url", "price", "isPublished", "syllabus"];
+    const updates = Object.fromEntries(
+        allowedFields
+            .filter((field) => Object.hasOwn(req.body || {}, field))
+            .map((field) => [field, req.body[field]])
+    );
+    if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ message: "Provide at least one valid course field to update." });
+    }
+
     try {
-        const course_id = req.params.id;
-        if(!course_id){
-              return res.status(400).json({
-                message : "Wrong credentials or re-login"
-            })
+        const course = await Course.findByIdAndUpdate(
+            courseId,
+            updates,
+            { new: true, runValidators: true }
+        );
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
         }
-        const updatedCourse = await Course.findByIdAndUpdate(course_id,{title, description, image_url, price, syllabus},{ new: true, runValidators: true })
-
-        if(!updatedCourse){
-            return res.status(400).json({message : "Somthing went wrong at updating, please try again later"});
-        }
-
         return res.status(200).json({
-            message:"Course Updated",
-            updatedCourse
-        })
-
+            message: "Course updated.",
+            data: course,
+        });
     } catch (error) {
-        return res.status(500).json({
-            message:error.message
-        })
+        return handleCourseError(res, error);
     }
-}
+};
 
-// Delete Course by id
+export const deleteCourseById = async (req, res) => {
+    const courseId = req.params.id;
+    if (!mongoose.isObjectIdOrHexString(courseId)) {
+        return invalidId(res);
+    }
 
-export const deleteCourseById = async(req,res)=>{
     try {
-         const course_id = req.params.id;
-        if(!course_id){
-              return res.status(400).json({
-                message : "Wrong credentials or re-login"
-            })
+        const course = await Course.findByIdAndDelete(courseId);
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
         }
-        const deleteCourse = await Course.findByIdAndDelete(course_id);
-        if(!deleteCourse){
-            return res.status(400).json({
-                message : "Something went wrong, please try again later",
-            });
-        }
-        return res.status(200).json({
-            message : "Course deleted"
-        })
+        return res.status(200).json({ message: "Course deleted." });
     } catch (error) {
-        return res.status(500).json({
-            message : error.message
-        })
+        return handleCourseError(res, error);
     }
-}
+};

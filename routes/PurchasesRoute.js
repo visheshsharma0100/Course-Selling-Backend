@@ -1,20 +1,20 @@
 import { Router } from "express";
-import { DeletePurchase, GetAllPurchases, GetMyPurchases, PostPurchase, UpdatePurchase } from "../controllers/Purchases_controller.js";
-import authMiddleware from "../middleware/authMiddleware.js"
-import adminMiddleware from "../middleware/adminMiddleware.js"
+import { DeletePurchase, GetAllPurchases, GetMyPurchases, GetPurchaseById, PostPurchase, UpdatePurchase } from "../controllers/Purchases_controller.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import adminMiddleware from "../middleware/adminMiddleware.js";
+
 const PurchaseRouter = Router();
 
-// Post route for buy 
-PurchaseRouter.post("/purchase/:courseId",authMiddleware,PostPurchase);
+PurchaseRouter.post("/purchase/:courseId", authMiddleware, PostPurchase);
 
-// Get all brought course
-PurchaseRouter.get("/purchase",authMiddleware,GetAllPurchases);
+PurchaseRouter.get("/purchase/my", authMiddleware, GetMyPurchases);
+PurchaseRouter.get("/purchase/all", authMiddleware, adminMiddleware, GetAllPurchases);
+PurchaseRouter.get("/purchase/:purchaseId", authMiddleware, adminMiddleware, GetPurchaseById);
 
-// Get Brought course by id from admin end
-PurchaseRouter.get("/purchase/:Courseid",adminMiddleware,authMiddleware,GetMyPurchases);
+// Preserve the original user-scoped endpoint without exposing other users' purchases.
+PurchaseRouter.get("/purchase", authMiddleware, GetMyPurchases);
 
-// update purchase course
-PurchaseRouter.put("/purchase/:CourseId",adminMiddleware,authMiddleware,UpdatePurchase);
+PurchaseRouter.put("/purchase/:purchaseId", authMiddleware, adminMiddleware, UpdatePurchase);
+PurchaseRouter.delete("/purchase/:purchaseId", authMiddleware, adminMiddleware, DeletePurchase);
 
-// delete purchase course
-PurchaseRouter.delete("/purchase/:CourseId",adminMiddleware,authMiddleware,DeletePurchase);
+export default PurchaseRouter;

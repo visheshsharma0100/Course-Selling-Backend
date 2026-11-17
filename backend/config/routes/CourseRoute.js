@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteCourseById, GetCourse, GetCourseById, PostCourses, updateCourseById } from "../controllers/Courses_controller.js";
+import { deleteCourseById, GetCourse, GetCourseById, PostCourses, updateCourseById } from "../../controllers/Courses_controller.js";
 import adminMiddleware from "../middleware/adminMiddleware.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 

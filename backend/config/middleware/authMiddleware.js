@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import mongoose from "mongoose";
-import users from "../Schema/user.schema.js";
+import users from "../../Schema/user.schema.js";
 
 const authMiddleware = async (req, res, next) => {
     try {

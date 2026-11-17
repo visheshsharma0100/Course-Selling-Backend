@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { DeletePurchase, GetAllPurchases, GetMyPurchases, GetPurchaseById, PostPurchase, UpdatePurchase } from "../controllers/Purchases_controller.js";
+import { DeletePurchase, GetAllPurchases, GetMyPurchases, GetPurchaseById, PostPurchase, UpdatePurchase } from "../../controllers/Purchases_controller.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import adminMiddleware from "../middleware/adminMiddleware.js";
 

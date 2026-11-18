@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { DeletePurchase, GetAllPurchases, GetMyPurchases, GetPurchaseById, PostPurchase, UpdatePurchase } from "../../controllers/Purchases_controller.js";
+import { CreatePurchaseOrder, DeletePurchase, GetAllPurchases, GetMyPurchases, GetPurchaseById, UpdatePurchase, VerifyPurchasePayment } from "../controllers/Purchases_controller.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import adminMiddleware from "../middleware/adminMiddleware.js";
 
 const PurchaseRouter = Router();
 
-PurchaseRouter.post("/purchase/:courseId", authMiddleware, PostPurchase);
+PurchaseRouter.post("/purchase/:courseId/order", authMiddleware, CreatePurchaseOrder);
+PurchaseRouter.post("/purchase/:courseId/verify", authMiddleware, VerifyPurchasePayment);
 
 PurchaseRouter.get("/purchase/my", authMiddleware, GetMyPurchases);
 PurchaseRouter.get("/purchase/all", authMiddleware, adminMiddleware, GetAllPurchases);

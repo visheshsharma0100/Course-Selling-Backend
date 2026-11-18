@@ -1,8 +1,9 @@
 
 import users from "../Schema/user.schema.js";
-import jwt from 'jsonwebtoken';
 import loginSchema from "../zod/loginZod.js";
 import bcrypt from 'bcrypt';
+import { signToken } from "../utils/jwt.js";
+import { publicUser } from "../utils/users.js";
 
 const signin = async (req, res) => {
     try {
@@ -15,12 +16,11 @@ const signin = async (req, res) => {
 
         const { email, password } = result.data;
 
-        const userExists = await users.findOne({
-            email
-        });
+        const userExists = await users.findOne({ email })
+            .collation({ locale: "en", strength: 2 });
         if (!userExists) {
-            return res.status(400).json({
-                message: "Invaild credentials"
+            return res.status(401).json({
+                message: "Invalid email or password."
             });
         }
 
@@ -31,15 +31,17 @@ const signin = async (req, res) => {
                 message: "Invalid email or password"
             });
         }
+        if (userExists.accountStatus === "suspended") {
+            return res.status(403).json({
+                message: "This account has been suspended.",
+            });
+        }
 
-        const token = jwt.sign(
-            { id: userExists._id },
-            process.env.Secret_key,
-            { expiresIn: "7d" }
-        );
+        const token = signToken(userExists._id);
         return res.status(200).json({
-            message: "Login Successfull",
-            token
+            message: "Login successful.",
+            token,
+            user: publicUser(userExists),
         });
 
     } catch (error) {
